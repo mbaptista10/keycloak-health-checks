@@ -11,6 +11,7 @@ import org.keycloak.Config;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,15 +57,21 @@ public class InfinispanHealthIndicator extends AbstractHealthIndicator {
     }
 
     protected Health getInfinispanHealth() {
-        return lookupCacheManager().getHealth();
+        Object cacheManager = lookupCacheManager();
+        try {
+            Method healthMethod = cacheManager.getClass().getMethod("getHealth");
+            return (Health) healthMethod.invoke(cacheManager);
+        } catch (Exception e) {
+            log.error("Erro ao acessar método getHealth via reflexão", e);
+            throw new RuntimeException(e);
+        }
     }
 
-    protected EmbeddedCacheManager lookupCacheManager() {
+    protected Object lookupCacheManager() {
         try {
-            Object cacheManager = new InitialContext().lookup(jndiName);
-            return (EmbeddedCacheManager) cacheManager;
+            return new InitialContext().lookup(jndiName);
         } catch (Exception e) {
-            log.warnv("Erro ao fazer lookup do EmbeddedCacheManager com nome: {0}, erro: {1}", jndiName, e.getMessage(), e);
+            log.warnv("Erro ao fazer lookup do CacheManager com nome: {0}, erro: {1}", jndiName, e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
