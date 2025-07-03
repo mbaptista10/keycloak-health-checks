@@ -62,6 +62,9 @@ public class InfinispanHealthIndicator extends AbstractHealthIndicator {
     protected EmbeddedCacheManager lookupCacheManager() {
         try {
             Object cacheManager = new InitialContext().lookup(jndiName);
+            if (!(cacheManager instanceof EmbeddedCacheManager)) {
+                throw new RuntimeException("O objeto JNDI encontrado não é um EmbeddedCacheManager");
+            }
             return (EmbeddedCacheManager) cacheManager;
         } catch (NamingException e) {
             log.warnv("Could not find EmbeddedCacheManager with name: {0}", jndiName);
