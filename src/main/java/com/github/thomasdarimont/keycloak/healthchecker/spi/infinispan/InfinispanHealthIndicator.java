@@ -56,19 +56,19 @@ public class InfinispanHealthIndicator extends AbstractHealthIndicator {
     }
 
     protected Health getInfinispanHealth() {
-        return lookupCacheManager().getHealth();
+        EmbeddedCacheManager cacheManager = lookupCacheManager();
+        return cacheManager.getHealth();
     }
 
-    protected EmbeddedCacheManager lookupCacheManager() {
-        try {
-            Object cacheManager = new InitialContext().lookup(jndiName);
-            // return (EmbeddedCacheManager) cacheManager;
-            return cacheManager;
-        } catch (NamingException e) {
-            log.warnv("Could not find EmbeddedCacheManager with name: {0}", jndiName);
-            throw new RuntimeException(e);
-        }
-    }
+    // protected EmbeddedCacheManager lookupCacheManager() {
+    //     try {
+    //         Object cacheManager = new InitialContext().lookup(jndiName);
+    //         return (EmbeddedCacheManager) cacheManager;
+    //     } catch (NamingException e) {
+    //         log.warnv("Could not find EmbeddedCacheManager with name: {0}", jndiName);
+    //         throw new RuntimeException(e);
+    //     }
+    // }
 
     protected KeycloakHealthStatus determineClusterHealth(ClusterHealth clusterHealth) {
 
